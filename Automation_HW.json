@@ -1,0 +1,1012 @@
+{
+  "name": "Automation_HW",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "appdo6sFybWgaAQDZ",
+          "mode": "id"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "tblgRarONNCZeyrAa",
+          "mode": "id"
+        },
+        "triggerField": "Last Modified",
+        "downloadAttachments": true,
+        "downloadFieldNames": "city_name email Status html_url user_feedback",
+        "additionalFields": {
+          "viewId": "viwcuiwt8evpzkzXi"
+        }
+      },
+      "id": "2647899e-0be2-4c86-850f-127a5288be6f",
+      "name": "Airtable Trigger (status NEW/REGENERATE)",
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        864,
+        -864
+      ],
+      "alwaysOutputData": false,
+      "notesInFlow": false,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "mjhgNezJgAqfeq0R",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "appdo6sFybWgaAQDZ",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://airtable.com/appdo6sFybWgaAQDZ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgRarONNCZeyrAa",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appdo6sFybWgaAQDZ/tblgRarONNCZeyrAa"
+        },
+        "id": "={{$json.id}}",
+        "options": {}
+      },
+      "id": "22556c82-1b23-48e9-8cd7-0b78be4c73a5",
+      "name": "Airtable - Read Request",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        -864
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "mjhgNezJgAqfeq0R",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "thevlamax@gmail.com",
+        "toEmail": "={{$node[\"Airtable - Read Request\"].json.email}}",
+        "subject": "=Travel page draft ready: {{$node[\"Airtable - Read Request\"].json.city_name}}",
+        "emailFormat": "html",
+        "html": "=={{\n  (() => {\n    const recordId =\n      $node[\"Airtable - Read Request\"].json.id ||\n      $node[\"Airtable - Read Request\"].json.recordId ||\n      $node[\"Airtable - Read Request\"].json.fields?.id;\n\n    const city =\n      $node[\"Airtable - Read Request\"].json.city_name ||\n      $node[\"Airtable - Read Request\"].json.fields?.city_name ||\n      \"Unknown city\";\n\n    const html = $node[\"HTTP Request for city_name\"].json.choices?.[0]?.message?.content || \"\";\n\n    return `\n<div style=\"margin:16px 0; font-family: Arial, sans-serif;\">\n  <div style=\"margin-bottom:10px; font-size:14px; color:#111;\">\n    Draft for <b>${city}</b> — choose:\n  </div>\n\n  <a href=\"https://vladafeka.app.n8n.cloud/webhook/approve?request_id=${recordId}\"\n     style=\"display:inline-block;padding:10px 16px;background:#22c55e;color:#fff;text-decoration:none;border-radius:8px;\">\n    Accept\n  </a>\n\n  <a href=\"https://vladafeka.app.n8n.cloud/webhook/reject-form?request_id=${recordId}\"\n     style=\"display:inline-block;padding:10px 16px;background:#ef4444;color:#fff;text-decoration:none;border-radius:8px;margin-left:10px;\">\n    Reject\n  </a>\n</div>\n\n<hr style=\"border:none;border-top:1px solid #e5e7eb;margin:16px 0;\" />\n\n${html}\n`;\n  })()\n}}\n",
+        "options": {}
+      },
+      "id": "0a9d084b-9eb5-47e0-a080-d30a7104e8f5",
+      "name": "Send Email (Approve / Reject links + HTML body)",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        -864
+      ],
+      "webhookId": "8c87c456-be3e-4f12-b678-6141a999f0ca",
+      "credentials": {
+        "smtp": {
+          "id": "VoUGLqIRmfVzMgnj",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "approve",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "2eaa48f2-6e4c-41fb-9cf7-8d038fb02bf3",
+      "name": "Webhook Approve (GET /approve)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        864,
+        -624
+      ],
+      "webhookId": "4c9a056a-69d4-4e29-96a7-c6da4db259f4",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appdo6sFybWgaAQDZ",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://airtable.com/appdo6sFybWgaAQDZ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgRarONNCZeyrAa",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appdo6sFybWgaAQDZ/tblgRarONNCZeyrAa"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{$json.query.request_id}}",
+            "Status": "ACCEPTED"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "city_name",
+              "displayName": "city_name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "user_feedback",
+              "displayName": "user_feedback",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "REJECTED",
+                  "value": "REJECTED"
+                },
+                {
+                  "name": "REGENERATE",
+                  "value": "REGENERATE"
+                },
+                {
+                  "name": "ACCEPTED",
+                  "value": "ACCEPTED"
+                },
+                {
+                  "name": "NEW",
+                  "value": "NEW"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "html_url",
+              "displayName": "html_url",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created By",
+              "displayName": "Created By",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "f7266421-2861-4b9f-899c-72c38f3fc3db",
+      "name": "Airtable - Update status=APPROVED + url",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        -624
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "mjhgNezJgAqfeq0R",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\" />\n  <title>Request Feedback</title>\n  <style>\n    body {\n      font-family: Arial, sans-serif;\n      padding: 24px;\n      max-width: 720px;\n      margin: 0 auto;\n      background: #f9fafb;\n    }\n    .card {\n      background: #ffffff;\n      border-radius: 12px;\n      padding: 20px;\n      box-shadow: 0 4px 10px rgba(0,0,0,0.06);\n    }\n    textarea {\n      width: 100%;\n      height: 160px;\n      padding: 12px;\n      font-size: 14px;\n      margin-top: 8px;\n      border-radius: 8px;\n      border: 1px solid #ccc;\n      resize: vertical;\n    }\n    button {\n      margin-top: 16px;\n      padding: 10px 18px;\n      border: none;\n      border-radius: 8px;\n      background: #ef4444;\n      color: #fff;\n      font-size: 14px;\n      cursor: pointer;\n    }\n    h2 {\n      margin-top: 0;\n    }\n  </style>\n</head>\n<body>\n\n  <h2>Request rejected</h2>\n\n  <div class=\"card\">\n    <p>Please describe what should be changed or improved:</p>\n\n    <form method=\"POST\" action=\"/webhook/reject-submit\">\n      <input\n        type=\"hidden\"\n        name=\"request_id\"\n        value=\"{{ $json.query.request_id }}\"\n      />\n\n      <textarea\n        name=\"feedback\"\n        placeholder=\"Example: add more attractions, focus on family activities, avoid nightlife...\"\n        required\n      ></textarea>\n\n      <button type=\"submit\">Submit feedback</button>\n    </form>\n  </div>\n\n</body>\n</html>\n",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=UTF-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1088,
+        -400
+      ],
+      "id": "5ad6f7fc-1558-4de4-a3eb-433275e97eaa",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "path": "reject-form",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        864,
+        -400
+      ],
+      "id": "d103c136-17ca-4672-90a9-13c3a16c041a",
+      "name": "Webhook Reject Form (GET)",
+      "webhookId": "09dd0ec8-1995-40b6-bf89-06cfe73beae0"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "reject-submit",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1280,
+        -400
+      ],
+      "id": "f667b43f-31a7-4c23-9f28-354983bdc0d2",
+      "name": "Webhook Reject Submit (POST)",
+      "webhookId": "103faaa4-525b-461c-9521-46c2adde156e"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appdo6sFybWgaAQDZ",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://airtable.com/appdo6sFybWgaAQDZ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgRarONNCZeyrAa",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appdo6sFybWgaAQDZ/tblgRarONNCZeyrAa"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.query?.request_id || $json.body?.request_id || $json.request_id }}",
+            "Status": "REGENERATE",
+            "user_feedback": "={{ $json.body.feedback || $json.body?.data?.feedback }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "city_name",
+              "displayName": "city_name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "user_feedback",
+              "displayName": "user_feedback",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "REJECTED",
+                  "value": "REJECTED"
+                },
+                {
+                  "name": "REGENERATE",
+                  "value": "REGENERATE"
+                },
+                {
+                  "name": "ACCEPTED",
+                  "value": "ACCEPTED"
+                },
+                {
+                  "name": "NEW",
+                  "value": "NEW"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "html_url",
+              "displayName": "html_url",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created",
+              "displayName": "Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1504,
+        -400
+      ],
+      "id": "6d16c435-2806-4b1c-957c-7a22747d7316",
+      "name": "Update record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "mjhgNezJgAqfeq0R",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\" />\n  <title>Feedback received</title>\n  <style>\n    body { font-family: Arial, sans-serif; padding: 24px; max-width: 720px; margin: 0 auto; background:#f9fafb; }\n    .card { background:#fff; border-radius:12px; padding:20px; box-shadow:0 4px 10px rgba(0,0,0,0.06); }\n    a { color:#2563eb; text-decoration:none; }\n  </style>\n</head>\n<body>\n  <h2>Thank you</h2>\n  <div class=\"card\">\n    <p>Your feedback was saved successfully.</p>\n    <p>The system will regenerate a new draft and email it to you shortly.</p>\n  </div>\n</body>\n</html>\n",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=UTF-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1728,
+        -400
+      ],
+      "id": "2d40a181-ba81-4d61-82e5-7cc1bc94a74b",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "keronell",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "vlad_ronen_automationHW",
+          "mode": "list",
+          "cachedResultName": "vlad_ronen_automationHW",
+          "cachedResultUrl": "https://github.com/keronell/vlad_ronen_automationHW"
+        },
+        "filePath": "={{ 'Guides/' + $node[\"Airtable - Read Request\"].json.city_name.replace(/\\s+/g,'-').toLowerCase() + '.html' }}",
+        "fileContent": "={{ $node[\"HTTP Request for city_name\"].json.choices[0].message.content }}",
+        "commitMessage": "={{ 'Add ' + $node[\"Airtable - Read Request\"].json.city_name + ' city guide' }}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        2208,
+        -768
+      ],
+      "id": "b3a69343-8004-4754-a3d3-380532b8ca22",
+      "name": "Create a file",
+      "webhookId": "254b0bc4-1d18-461a-abf4-b7b1d897d638",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "NT7zlnscalW9NFdM",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "24637946-2cdd-4f0e-aa6d-f8f7068a29c2",
+              "leftValue": "={{ $json.sha }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1984,
+        -864
+      ],
+      "id": "f3c82271-ee89-41ca-bb6b-7c48d30b96f5",
+      "name": "If",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "keronell",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "vlad_ronen_automationHW",
+          "mode": "list",
+          "cachedResultName": "vlad_ronen_automationHW",
+          "cachedResultUrl": "https://github.com/keronell/vlad_ronen_automationHW"
+        },
+        "filePath": "={{ 'Guides/' + $node[\"Airtable - Read Request\"].json.city_name.replace(/\\s+/g,'-').toLowerCase() + '.html' }}",
+        "fileContent": "={{ $node[\"HTTP Request for city_name\"].json.choices[0].message.content }}",
+        "commitMessage": "={{ 'Add ' + $node[\"Airtable - Read Request\"].json.city_name + ' city guide' }}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        2208,
+        -960
+      ],
+      "id": "a61ca395-b28a-4d4c-a635-8137f190cc3a",
+      "name": "Edit a file",
+      "webhookId": "58f694fe-0c74-40b8-a9c6-ab1b1a04f6a1",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "NT7zlnscalW9NFdM",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "mode": "name",
+          "value": "keronell"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "vlad_ronen_automationHW",
+          "mode": "list",
+          "cachedResultName": "vlad_ronen_automationHW",
+          "cachedResultUrl": "https://github.com/keronell/vlad_ronen_automationHW"
+        },
+        "filePath": "={{ 'Guides/' + $node[\"Airtable - Read Request\"].json.city_name.replace(/\\s+/g,'-').toLowerCase() + '.html' }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1760,
+        -864
+      ],
+      "id": "b9b058f6-d368-47e9-b5f2-3f578c001b64",
+      "name": "GitHub - Get file",
+      "webhookId": "80368600-48cf-4dcf-9c5c-7c19aee59668",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "NT7zlnscalW9NFdM",
+          "name": "GitHub account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0ceeee3f-5de1-4989-b265-51fd9e000477",
+              "name": "id",
+              "value": "={{ $node[\"Airtable - Read Request\"].json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "cb1c7d51-ae95-4c63-9b46-776ddd1c9dd2",
+              "name": "html_url",
+              "value": "={{ $node[\"Create a file\"].json.content.html_url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2432,
+        -768
+      ],
+      "id": "d5069403-4efc-46da-ab8f-1eaceb00a589",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"temperature\": 0.6,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Return ONLY a complete HTML document (no markdown, no JSON, no explanations). Include all CSS inside a single <style> block.\\n\\nRequirements:\\n1) Title + short intro about the city.\\n\\n2) Images section:\\n- Include at least 3 images.\\n- Use ONLY this exact format (no other hosts):\\n  https://picsum.photos/seed/<SEED>/1200/800\\n- Replace <SEED> with: <CITY_NAME>_<KEYWORD>\\n- Use underscores, no spaces.\\n- Example seeds:\\n  Tel_Aviv_market\\n  Tel_Aviv_skyline\\n  Tel_Aviv_beach\\n- Use <img> tags only.\\n\\n3) Attractions section:\\n- Include at least 5 recommended attractions.\\n- Each attraction must have a short description.\\n\\n4) Map section (EMAIL-SAFE):\\n- DO NOT include any map images.\\n- DO NOT include scripts, iframes, Leaflet, or APIs.\\n- Add a section titled \\\"Map\\\".\\n- Add a sentence inviting the user to open the city in Google Maps.\\n- Add a link with:\\n  href=\\\"https://www.google.com/maps/search/?api=1&query=<CITY_NAME_URLENCODED>\\\"\\n- <CITY_NAME_URLENCODED> must replace spaces with + (example: Tel+Aviv).\\n- The link text must be EXACTLY: Click here\\n\\nOutput rules:\\n- Return a single valid HTML document starting with <!DOCTYPE html> and ending with </html>.\\n- No markdown, no code fences, no JSON.\\n- No external JS.\\n- Ensure all images use the picsum format exactly.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"City name: {{$json.city_name}}\\nUser feedback (apply fixes if present): {{$json.user_feedback || 'None'}}\"\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1312,
+        -864
+      ],
+      "id": "a643e189-d2f6-4091-b48d-bbfcab181794",
+      "name": "HTTP Request for city_name",
+      "credentials": {
+        "xAiApi": {
+          "id": "v1BAMW1f0ry9WSXJ",
+          "name": "xAi account"
+        },
+        "httpHeaderAuth": {
+          "id": "Jnycl3NGZiiEcZ0Q",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appdo6sFybWgaAQDZ",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://airtable.com/appdo6sFybWgaAQDZ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgRarONNCZeyrAa",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appdo6sFybWgaAQDZ/tblgRarONNCZeyrAa"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "html_url": "={{ $json.html_url }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "city_name",
+              "displayName": "city_name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "user_feedback",
+              "displayName": "user_feedback",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "REGENERATE",
+                  "value": "REGENERATE"
+                },
+                {
+                  "name": "ACCEPTED",
+                  "value": "ACCEPTED"
+                },
+                {
+                  "name": "NEW",
+                  "value": "NEW"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "html_url",
+              "displayName": "html_url",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created",
+              "displayName": "Created",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Last Modified",
+              "displayName": "Last Modified",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2656,
+        -768
+      ],
+      "id": "ec0e5770-8a0e-48d9-8807-c7740b5e566f",
+      "name": "Add URL",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "mjhgNezJgAqfeq0R",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Airtable Trigger (status NEW/REGENERATE)": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Read Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Read Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request for city_name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Approve (GET /approve)": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Update status=APPROVED + url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Update status=APPROVED + url": {
+      "main": [
+        []
+      ]
+    },
+    "Send Email (Approve / Reject links + HTML body)": {
+      "main": [
+        [
+          {
+            "node": "GitHub - Get file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Reject Form (GET)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Reject Submit (POST)": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit a file": {
+      "main": [
+        []
+      ]
+    },
+    "GitHub - Get file": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a file": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Add URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request for city_name": {
+      "main": [
+        [
+          {
+            "node": "Send Email (Approve / Reject links + HTML body)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "0476b0cd-775b-4811-9f25-81559ca6a92e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3054703ef6a644f346531560d5a3d6364d71dcf72995f8c3e92d59b97290b31a"
+  },
+  "id": "5jI8NS2HvJJjizVF",
+  "tags": []
+}
